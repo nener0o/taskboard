@@ -1,12 +1,14 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
-from fastapi.responses import FileResponse, Response
+from fastapi.responses import FileResponse, HTMLResponse, PlainTextResponse, Response
 
 from app.config import settings
-from app.deps import AuthDep, CurrentUser, OptionalUser, StorageDep, TaskDep, UserDep, require_permission
+from app.deps import AuthDep, CurrentUser, OptionalUser, StorageDep, TaskDep, UserDep, WeatherDep, require_permission
 from app.models import TaskPriority, TaskStatus, User
+from app.pages import render_task_page
 from app.permissions import PERMISSIONS, ROLE_PERMISSIONS
+from app.repositories import TaskRepository
 from app.schemas import (
     FileOut,
     LoginIn,
@@ -21,6 +23,7 @@ from app.schemas import (
     TokenOut,
     UserDirectoryItem,
     UserOut,
+    WeatherOut,
 )
 from app.services import task_out
 
@@ -173,3 +176,57 @@ def download_file(file_id: int, token: str, storage: StorageDep):
     if path is not None:
         return FileResponse(path, media_type=row.content_type, filename=row.original_name)
     return Response(content=data, media_type=row.content_type, headers={"Content-Disposition": disposition})
+
+
+@api.get("/integrations/weather", response_model=WeatherOut)
+def weather(service: WeatherDep) -> WeatherOut:
+    return service.current()
+
+
+public = APIRouter()
+
+
+@public.get("/robots.txt", response_class=PlainTextResponse)
+def robots() -> str:
+    base = settings.public_base_url.rstrip("/")
+    return (
+        "User-agent: *\n"
+        "Allow: /\n"
+        "Allow: /tasks\n"
+        "Disallow: /app\n"
+        "Disallow: /login\n"
+        "Disallow: /register\n"
+        "Disallow: /admin\n"
+        "Disallow: /demo\n"
+        "Disallow: /compare\n"
+        "Disallow: /api/\n"
+        f"Sitemap: {base}/sitemap.xml\n"
+    )
+
+
+@public.get("/sitemap.xml")
+def sitemap(tasks: TaskDep) -> Response:
+    base = settings.frontend_base_url.rstrip("/")
+    urls = [f"{base}/", f"{base}/tasks"]
+    for task in TaskRepository(tasks.db).public_for_sitemap():
+        lastmod = task.updated_at.date().isoformat()
+        urls.append(f"{base}/tasks/{task.id}|{lastmod}")
+    body = ["<?xml version=\"1.0\" encoding=\"UTF-8\"?>", '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
+    for item in urls:
+        loc, _, lastmod = item.partition("|")
+        body.append("<url>")
+        body.append(f"<loc>{loc}</loc>")
+        if lastmod:
+            body.append(f"<lastmod>{lastmod}</lastmod>")
+        body.append("</url>")
+    body.append("</urlset>")
+    return Response("\n".join(body), media_type="application/xml")
+
+
+@public.get("/pages/tasks/{task_id}", response_class=HTMLResponse)
+def public_task_page(task_id: int, tasks: TaskDep) -> HTMLResponse:
+    try:
+        task = tasks.get_visible(task_id, None)
+    except HTTPException as exc:
+        return HTMLResponse(render_task_page(None, exc.status_code, exc.detail), status_code=exc.status_code)
+    return HTMLResponse(render_task_page(task, 200, ""))

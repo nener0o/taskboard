@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import api
+from app.api import api, public
 from app.config import settings
 from app.migrate import init_db
 
@@ -29,3 +29,4 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.include_router(api, prefix="/api")
+app.include_router(public)
