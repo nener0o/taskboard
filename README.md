@@ -50,19 +50,3 @@ cd frontend && npm test && npm run build
 node practicals/02-event-loop/demo.mjs
 python practicals/03-sql-nosql/run_demo.py
 ```
-
-## Что где лежит
-
-| Работа | Где смотреть |
-| --- | --- |
-| Лаб. 1. Роли и права | `backend/app/permissions.py`, `frontend/src/lib/roles.ts` |
-| Лаб. 2. Access и refresh | `backend/app/security.py`, `backend/app/services.py`, `frontend/src/api/client.ts` |
-| Лаб. 3. Фильтры и файлы | `frontend/src/components/FilterBar.tsx`, `backend/app/services.py` (`StorageService`) |
-| Лаб. 4. SEO и внешний API | `frontend/src/components/Seo.tsx`, `backend/app/pages.py`, погода Open-Meteo |
-| Лаб. 5. Тесты | `backend/tests`, `frontend/src/**/*.test.ts` |
-| Лаб. 6. Docker и CI | `docker-compose.yml`, `Dockerfile`, `.github/workflows/ci.yml` |
-| Практ. 1. Context и Redux | `frontend/src/practical1`, маршруты `/demo/context` и `/demo/redux` |
-| Практ. 2. Event loop | `practicals/02-event-loop/demo.mjs` |
-| Практ. 3. SQL и NoSQL | `practicals/03-sql-nosql` |
-| Практ. 4. REST и GraphQL | `/docs`, `/graphql`, страница `/compare` |
-| Практ. 5–8. Дизайн | разделы в `ОТЧЁТ.md` |
