@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api import api, public
 from app.config import settings
+from app.graphql_schema import graphql_router
 from app.migrate import init_db
 
 logging.basicConfig(level=logging.INFO)
@@ -30,3 +31,4 @@ app.add_middleware(
 )
 app.include_router(api, prefix="/api")
 app.include_router(public)
+app.include_router(graphql_router, prefix="/graphql")

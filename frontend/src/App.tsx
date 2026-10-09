@@ -13,6 +13,9 @@ import { TaskFormPage } from "./pages/TaskFormPage";
 import { TaskPage } from "./pages/TaskPage";
 
 const AdminPage = lazy(() => import("./pages/AdminPage").then((module) => ({ default: module.AdminPage })));
+const ComparePage = lazy(() => import("./pages/ComparePage").then((module) => ({ default: module.ComparePage })));
+const ContextDemo = lazy(() => import("./practical1/context/ContextApp"));
+const ReduxDemo = lazy(() => import("./practical1/redux/ReduxApp"));
 
 export function App() {
   return (
@@ -25,6 +28,9 @@ export function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/forbidden" element={<ForbiddenPage />} />
+          <Route path="/compare" element={<ComparePage />} />
+          <Route path="/demo/context" element={<ContextDemo />} />
+          <Route path="/demo/redux" element={<ReduxDemo />} />
           <Route path="/app" element={<RequireAuth><BoardPage /></RequireAuth>} />
           <Route path="/app/tasks/new" element={<RequireAuth><TaskFormPage /></RequireAuth>} />
           <Route path="/app/tasks/:id" element={<RequireAuth><TaskFormPage /></RequireAuth>} />
